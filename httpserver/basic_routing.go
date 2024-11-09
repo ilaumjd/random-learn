@@ -5,17 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync/atomic"
 )
 
 func handleHealthz(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(http.StatusText(http.StatusOK)))
-}
-
-type apiConfig struct {
-	fileserverHits atomic.Int32
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -34,10 +29,6 @@ func (cfg *apiConfig) handleMetrics(w http.ResponseWriter, r *http.Request) {
     <p>Chirpy has been visited %d times!</p>
   </body>
 </html>`, cfg.fileserverHits.Load())
-}
-
-func (cfg *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
-	cfg.fileserverHits.Store(0)
 }
 
 func handleValidateChirp(w http.ResponseWriter, r *http.Request) {
@@ -61,19 +52,6 @@ func handleValidateChirp(w http.ResponseWriter, r *http.Request) {
 		CleanedBody: cleanBody(params.Body),
 	}
 	respondWithJSON(w, 200, respBody)
-}
-
-func respondWithError(w http.ResponseWriter, code int, msg string) {
-	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"error": "` + msg + `"}`))
-}
-
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "application/json")
-	response, _ := json.Marshal(payload)
-	w.Write(response)
 }
 
 func cleanBody(body string) string {
