@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync/atomic"
 )
 
@@ -78,10 +79,10 @@ func handleValidateChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type returnVals struct {
-		Valid bool `json:"valid"`
+		CleanedBody string `json:"cleaned_body"`
 	}
 	respBody := returnVals{
-		Valid: true,
+		CleanedBody: cleanBody(params.Body),
 	}
 	respondWithJSON(w, 200, respBody)
 }
@@ -97,4 +98,19 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	response, _ := json.Marshal(payload)
 	w.Write(response)
+}
+
+func cleanBody(body string) string {
+	substrings := strings.Split(body, " ")
+	notAllowed := map[string]bool{
+		"kerfuffle": true,
+		"sharbert":  true,
+		"fornax":    true,
+	}
+	for i, s := range substrings {
+		if notAllowed[strings.ToLower(s)] {
+			substrings[i] = "****"
+		}
+	}
+	return strings.Join(substrings, " ")
 }
