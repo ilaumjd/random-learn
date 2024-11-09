@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 func handleHealthz(w http.ResponseWriter, r *http.Request) {
@@ -29,42 +27,4 @@ func (cfg *apiConfig) handleMetrics(w http.ResponseWriter, r *http.Request) {
     <p>Chirpy has been visited %d times!</p>
   </body>
 </html>`, cfg.fileserverHits.Load())
-}
-
-func handleValidateChirp(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-		Body string `json:"body"`
-	}
-
-	decoder := json.NewDecoder(r.Body)
-	params := parameters{}
-	_ = decoder.Decode(&params)
-
-	if len(params.Body) > 140 {
-		respondWithError(w, 400, "Chirp is too long")
-		return
-	}
-
-	type returnVals struct {
-		CleanedBody string `json:"cleaned_body"`
-	}
-	respBody := returnVals{
-		CleanedBody: cleanBody(params.Body),
-	}
-	respondWithJSON(w, 200, respBody)
-}
-
-func cleanBody(body string) string {
-	substrings := strings.Split(body, " ")
-	notAllowed := map[string]bool{
-		"kerfuffle": true,
-		"sharbert":  true,
-		"fornax":    true,
-	}
-	for i, s := range substrings {
-		if notAllowed[strings.ToLower(s)] {
-			substrings[i] = "****"
-		}
-	}
-	return strings.Join(substrings, " ")
 }
