@@ -1,15 +1,29 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync/atomic"
+
+	"github.com/ilaumjd/random-learn/httpserver/internal/database"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
+	godotenv.Load()
+
+	dbURL := os.Getenv("DB_URL")
+
+	db, _ := sql.Open("postgres", dbURL)
+
+	_ = database.New(db)
+
 	mux := http.NewServeMux()
 
 	apiCfg := apiConfig{}
