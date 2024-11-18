@@ -11,3 +11,11 @@ SELECT
   *
 FROM
   chirps;
+
+-- name: GetChirp :one
+SELECT
+  *
+FROM
+  chirps
+WHERE
+  id = $1;
