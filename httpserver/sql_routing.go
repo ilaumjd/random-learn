@@ -98,3 +98,20 @@ func cleanBody(body string) string {
 	}
 	return strings.Join(substrings, " ")
 }
+
+func (cfg *apiConfig) handleGetChirps(w http.ResponseWriter, r *http.Request) {
+	dbChirps, _ := cfg.db.GetChirps(r.Context())
+
+	chirps := []Chirp{}
+	for _, dbChirp := range dbChirps {
+		chirps = append(chirps, Chirp{
+			ID:        dbChirp.ID,
+			CreatedAt: dbChirp.CreatedAt,
+			UpdatedAt: dbChirp.UpdatedAt,
+			Body:      dbChirp.Body,
+			UserID:    dbChirp.UserID,
+		})
+	}
+
+	respondWithJSON(w, http.StatusOK, chirps)
+}
